@@ -69,7 +69,7 @@ $(document).ready(function() {
         setDragable(box);
 
         for (var i = 0; i < boxes.length; i++) {
-            if (box !== boxes[i]) {
+            if (box.Name !== boxes[i].Name) {
                 createBox(boxes[i]);
             }
         }
