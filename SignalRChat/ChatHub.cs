@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNet.SignalR;
+using System.Runtime.Caching;
 
 namespace SignalRChat
 {
@@ -17,24 +18,33 @@ namespace SignalRChat
 
     public class ChatHub : Hub
     {
-        private IList<Box> boxes;
+        private static string boxCacheName = "Boxes";
+        private static MemoryCache cache = MemoryCache.Default;
  
         public ChatHub()
         {
-            boxes = new List<Box>();
+            
         }
 
         private void removeBox(string name)
         {
-            foreach (Box box in boxes)
-            {
-                if (box.Name == name)
-                {
-                    boxes.Remove(box);
-                    break;
-                }
-            }
+            var boxes = getBoxCache();
+            boxes.Remove(name);
         }
+
+        private void addBox(Box box)
+        {
+            var boxes = getBoxCache();
+            boxes.Add(box.Name, box);
+        }
+
+        private IDictionary<string,Box> getBoxCache()
+        {
+            if (cache[boxCacheName] == null)
+                cache[boxCacheName] = new Dictionary<string, Box>();
+
+            return cache[boxCacheName] as Dictionary<string,Box>;
+        } 
 
         public override Task OnConnected()
         {
@@ -46,10 +56,11 @@ namespace SignalRChat
                     Y = "50"
                 };
 
-            boxes.Add(box);
+
+            addBox(box);
 
             Clients.Others.joined(box);
-            return Clients.Caller.createOwnBox(box, boxes);
+            return Clients.Caller.createOwnBox(box, getBoxCache().ToList());
         }
 
         public override Task OnDisconnected()
@@ -60,6 +71,9 @@ namespace SignalRChat
 
         public void MoveBox(Box box)
         {
+            // Update box value
+            var boxes = getBoxCache();
+            boxes[box.Name] = box;
             // Call the updateBoxLocation method to update everyone but the sender.
             Clients.Others.updateBoxLocation(box);
         }
