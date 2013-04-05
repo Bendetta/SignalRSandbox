@@ -1,0 +1,24 @@
+﻿.container {
+    background-color: #99CCFF;
+    border: thick solid #808080;
+    padding: 20px;
+    margin: 20px;
+}
+
+.box {
+    border: 1px solid black;
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    position: absolute;
+}
+
+.movable {
+    cursor: pointer;
+}
+
+input {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
